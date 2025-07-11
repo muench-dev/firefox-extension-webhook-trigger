@@ -1,13 +1,16 @@
 // Function to load and display webhooks
 const loadWebhooks = async () => {
-  const { webhooks = [] } = await browser.storage.sync.get("webhooks");
+  // Get browser API abstraction
+  const browserAPI = window.getBrowserAPI();
+
+  const { webhooks = [] } = await browserAPI.storage.sync.get("webhooks");
   const list = document.getElementById("webhook-list");
   const message = document.getElementById("no-webhooks-message");
   list.innerHTML = "";
 
   if (webhooks.length === 0) {
     message.classList.remove("hidden");
-    message.textContent = browser.i18n.getMessage("optionsNoWebhooksMessage");
+    message.textContent = browserAPI.i18n.getMessage("optionsNoWebhooksMessage");
   } else {
     message.classList.add("hidden");
     webhooks.forEach((webhook) => {
@@ -30,12 +33,12 @@ const loadWebhooks = async () => {
 
       const deleteButton = document.createElement("button");
       // Use localized text for the button
-      deleteButton.textContent = browser.i18n.getMessage("optionsDeleteButton");
+      deleteButton.textContent = browserAPI.i18n.getMessage("optionsDeleteButton");
       deleteButton.classList.add("delete-btn");
 
       // Add edit button
       const editButton = document.createElement("button");
-      editButton.textContent = browser.i18n.getMessage("optionsEditButton") || "Edit";
+      editButton.textContent = browserAPI.i18n.getMessage("optionsEditButton") || "Edit";
       editButton.classList.add("edit-btn");
 
       listItem.appendChild(textContent);
@@ -48,7 +51,8 @@ const loadWebhooks = async () => {
 
 // Function to save webhooks
 const saveWebhooks = (webhooks) => {
-  return browser.storage.sync.set({ webhooks });
+  const browserAPI = window.getBrowserAPI();
+  return browserAPI.storage.sync.set({ webhooks });
 };
 
 // Track edit mode state
@@ -123,7 +127,8 @@ form.addEventListener("submit", async (e) => {
   const url = urlInput.value.trim();
   const method = methodSelect.value;
   const identifier = identifierInput.value.trim();
-  let { webhooks = [] } = await browser.storage.sync.get("webhooks");
+  const browserAPI = window.getBrowserAPI();
+  let { webhooks = [] } = await browserAPI.storage.sync.get("webhooks");
 
   if (editWebhookId) {
     // Edit mode: update existing webhook
@@ -153,7 +158,7 @@ form.addEventListener("submit", async (e) => {
   headers = [];
   renderHeaders();
   // Always reset to save button after submit
-  form.querySelector('button[type="submit"]').textContent = browser.i18n.getMessage("optionsSaveButton") || "Save Webhook";
+  form.querySelector('button[type="submit"]').textContent = browserAPI.i18n.getMessage("optionsSaveButton") || "Save Webhook";
   loadWebhooks();
 });
 
@@ -163,7 +168,8 @@ webhookList.addEventListener("click", async (e) => {
   const listItem = e.target.closest("li");
   if (!listItem) return;
   const webhookId = listItem.dataset.id;
-  let { webhooks = [] } = await browser.storage.sync.get("webhooks");
+  const browserAPI = window.getBrowserAPI();
+  let { webhooks = [] } = await browserAPI.storage.sync.get("webhooks");
 
   if (e.target.classList.contains("delete-btn")) {
     // Delete webhook
@@ -180,7 +186,7 @@ webhookList.addEventListener("click", async (e) => {
       headers = [];
       renderHeaders();
       cancelEditBtn.classList.add("hidden");
-      form.querySelector('button[type="submit"]').textContent = browser.i18n.getMessage("optionsSaveButton") || "Save Webhook";
+      form.querySelector('button[type="submit"]').textContent = browserAPI.i18n.getMessage("optionsSaveButton") || "Save Webhook";
     }
   } else if (e.target.classList.contains("edit-btn")) {
     // Edit webhook
@@ -195,7 +201,7 @@ webhookList.addEventListener("click", async (e) => {
       renderHeaders();
       cancelEditBtn.classList.remove("hidden");
       // Always set to save button when entering edit mode
-      form.querySelector('button[type="submit"]').textContent = browser.i18n.getMessage("optionsSaveButton") || "Save Webhook";
+      form.querySelector('button[type="submit"]').textContent = browserAPI.i18n.getMessage("optionsSaveButton") || "Save Webhook";
       labelInput.focus();
     }
   }
@@ -211,7 +217,8 @@ cancelEditBtn.addEventListener("click", () => {
   headers = [];
   renderHeaders();
   cancelEditBtn.classList.add("hidden");
-  form.querySelector('button[type="submit"]').textContent = browser.i18n.getMessage("optionsSaveButton") || "Save Webhook";
+  const browserAPI = window.getBrowserAPI();
+  form.querySelector('button[type="submit"]').textContent = browserAPI.i18n.getMessage("optionsSaveButton") || "Save Webhook";
 });
 
 // Show webhooks on page load
@@ -219,11 +226,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Replace i18n placeholders
   replaceI18nPlaceholders();
 
+  // Get browser API abstraction
+  const browserAPI = window.getBrowserAPI();
+
   // Set localized placeholder for webhook-label input
-  labelInput.placeholder = browser.i18n.getMessage("optionsLabelInputPlaceholder");
+  labelInput.placeholder = browserAPI.i18n.getMessage("optionsLabelInputPlaceholder");
 
   // Set localized label for cancel edit button
-  cancelEditBtn.textContent = browser.i18n.getMessage("optionsCancelEditButton") || "Cancel";
+  cancelEditBtn.textContent = browserAPI.i18n.getMessage("optionsCancelEditButton") || "Cancel";
 
   // Load webhooks
   loadWebhooks();

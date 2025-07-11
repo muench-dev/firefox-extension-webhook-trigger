@@ -4,14 +4,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const buttonsContainer = document.getElementById("buttons-container");
 
+  // Get browser API abstraction
+  const browserAPI = window.getBrowserAPI();
+
   // Load webhooks from storage
-  const { webhooks = [] } = await browser.storage.sync.get("webhooks");
+  const { webhooks = [] } = await browserAPI.storage.sync.get("webhooks");
 
   if (webhooks.length === 0) {
     // Use textContent instead of innerHTML for security
     const p = document.createElement("p");
     p.className = "no-hooks-msg";
-    p.textContent = browser.i18n.getMessage("popupNoWebhooksConfigured");
+    p.textContent = browserAPI.i18n.getMessage("popupNoWebhooksConfigured");
     buttonsContainer.textContent = ""; // Clear any existing content
     buttonsContainer.appendChild(p);
   } else {
@@ -38,6 +41,9 @@ document
       return;
     }
 
+    // Get browser API abstraction
+    const browserAPI = window.getBrowserAPI();
+
     const button = e.target;
     const url = button.dataset.url;
     const originalLabel = button.dataset.label;
@@ -51,25 +57,25 @@ document
     }
 
     button.disabled = true;
-    button.textContent = browser.i18n.getMessage("popupSending");
+    button.textContent = browserAPI.i18n.getMessage("popupSending");
     statusMessage.textContent = "";
     statusMessage.className = "";
 
     try {
       // Get info about the active tab
-      const tabs = await browser.tabs.query({
+      const tabs = await browserAPI.tabs.query({
         active: true,
         currentWindow: true,
       });
       if (tabs.length === 0) {
-        throw new Error(browser.i18n.getMessage("popupErrorNoActiveTab"));
+        throw new Error(browserAPI.i18n.getMessage("popupErrorNoActiveTab"));
       }
       const activeTab = tabs[0];
       const currentUrl = activeTab.url;
 
       // Get browser and platform info
-      const browserInfo = await browser.runtime.getBrowserInfo?.() || {};
-      const platformInfo = await browser.runtime.getPlatformInfo?.() || {};
+      const browserInfo = await browserAPI.runtime.getBrowserInfo() || {};
+      const platformInfo = await browserAPI.runtime.getPlatformInfo() || {};
 
       const payload = {
         tab: {
@@ -120,18 +126,18 @@ document
       const response = await fetch(fetchUrl, fetchOpts);
 
       if (!response.ok) {
-        throw new Error(browser.i18n.getMessage("popupErrorHttp", response.status));
+        throw new Error(browserAPI.i18n.getMessage("popupErrorHttp", response.status));
       }
 
       // Success feedback
-      statusMessage.textContent = browser.i18n.getMessage("popupStatusSuccess");
+      statusMessage.textContent = browserAPI.i18n.getMessage("popupStatusSuccess");
       statusMessage.classList.add("success");
-      button.textContent = browser.i18n.getMessage("popupBtnTextSent");
+      button.textContent = browserAPI.i18n.getMessage("popupBtnTextSent");
     } catch (error) {
       console.error("Error sending webhook:", error);
-      statusMessage.textContent = `${browser.i18n.getMessage("popupStatusErrorPrefix")} ${error.message}`;
+      statusMessage.textContent = `${browserAPI.i18n.getMessage("popupStatusErrorPrefix")} ${error.message}`;
       statusMessage.classList.add("error");
-      button.textContent = browser.i18n.getMessage("popupBtnTextFailed");
+      button.textContent = browserAPI.i18n.getMessage("popupBtnTextFailed");
     } finally {
       // Re-enable button after a delay and restore state
       setTimeout(() => {
@@ -146,7 +152,8 @@ document
 // Link to open the options page
 document.getElementById("open-options").addEventListener("click", (e) => {
   e.preventDefault();
-  browser.runtime.openOptionsPage();
+  const browserAPI = window.getBrowserAPI();
+  browserAPI.runtime.openOptionsPage();
 });
 
 // Export for testing in Node environment
