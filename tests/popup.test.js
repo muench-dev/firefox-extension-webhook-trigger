@@ -29,6 +29,8 @@ describe('popup script', () => {
         getPlatformInfo: jest.fn().mockResolvedValue({}),
       },
     };
+    // Mock the getBrowserAPI function
+    global.window.getBrowserAPI = jest.fn().mockReturnValue(global.browser);
   });
 
   afterEach(() => {

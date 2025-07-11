@@ -42,6 +42,8 @@ describe('options page', () => {
         getMessage: jest.fn().mockImplementation((key) => key),
       },
     };
+    // Mock the getBrowserAPI function
+    global.window.getBrowserAPI = jest.fn().mockReturnValue(global.browser);
     ({ loadWebhooks, saveWebhooks } = require('../options/options.js'));
   });
 
